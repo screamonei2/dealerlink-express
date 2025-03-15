@@ -14,6 +14,7 @@ import Inventory from "./pages/Inventory";
 import InventoryDetails from "./pages/InventoryDetails";
 import DealerLayout from "./components/layout/DealerLayout";
 import Onboarding from "./pages/Onboarding";
+import BuyerLanding from "./pages/BuyerLanding";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/cars" element={<BuyerLanding />} />
             <Route path="/auth" element={
               session ? <Navigate to="/dashboard" /> : <Auth />
             } />

@@ -10,6 +10,7 @@ import { Search } from "lucide-react";
 
 interface CarSearchProps {
   onSearch: (filters: SearchFilters) => void;
+  onSearchChange?: (params: any) => void; // Added this prop to fix the error
 }
 
 export interface SearchFilters {
@@ -27,7 +28,7 @@ const carBrands = [
 const currentYear = new Date().getFullYear();
 const years = ["Any", ...Array.from({ length: 20 }, (_, i) => String(currentYear - i))];
 
-export default function CarSearch({ onSearch }: CarSearchProps) {
+export default function CarSearch({ onSearch, onSearchChange }: CarSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({
     brand: "Any",
     model: "",
@@ -38,6 +39,10 @@ export default function CarSearch({ onSearch }: CarSearchProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(filters);
+    // Call onSearchChange if it exists
+    if (onSearchChange) {
+      onSearchChange(filters);
+    }
   };
 
   const handlePriceRangeChange = (value: number[]) => {
