@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-import { CarSearch, SearchFilters } from "@/components/cars/CarSearch";
+import CarSearch, { SearchFilters } from "@/components/cars/CarSearch";
 import CarCard from "@/components/cars/CarCard";
 import LandingHeader from "@/components/layout/LandingHeader";
 import { Mail, Phone, MessageSquare, ChevronDown } from "lucide-react";
@@ -19,8 +18,8 @@ const mockCars = [
     brand: "Toyota",
     model: "Corolla",
     year: "2022",
-    price: 120000,
-    mileage: 5000,
+    price: "120000",
+    mileage: "5000",
     fuel: "flex",
     color: "Silver",
     transmission: "automatic",
@@ -32,8 +31,8 @@ const mockCars = [
     brand: "Honda",
     model: "Civic",
     year: "2021",
-    price: 110000,
-    mileage: 15000,
+    price: "110000",
+    mileage: "15000",
     fuel: "flex",
     color: "Black",
     transmission: "automatic",
@@ -45,8 +44,8 @@ const mockCars = [
     brand: "Volkswagen",
     model: "Golf",
     year: "2020",
-    price: 95000,
-    mileage: 25000,
+    price: "95000",
+    mileage: "25000",
     fuel: "flex",
     color: "White",
     transmission: "manual",
@@ -58,8 +57,8 @@ const mockCars = [
     brand: "Ford",
     model: "Ranger",
     year: "2021",
-    price: 180000,
-    mileage: 10000,
+    price: "180000",
+    mileage: "10000",
     fuel: "diesel",
     color: "Blue",
     transmission: "automatic",
@@ -71,8 +70,8 @@ const mockCars = [
     brand: "Fiat",
     model: "Argo",
     year: "2022",
-    price: 75000,
-    mileage: 8000,
+    price: "75000",
+    mileage: "8000",
     fuel: "flex",
     color: "Red",
     transmission: "manual",
@@ -84,8 +83,8 @@ const mockCars = [
     brand: "Jeep",
     model: "Renegade",
     year: "2020",
-    price: 120000,
-    mileage: 30000,
+    price: "120000",
+    mileage: "30000",
     fuel: "flex",
     color: "Green",
     transmission: "automatic",
@@ -129,9 +128,10 @@ export default function BuyerLanding() {
     }
     
     // Filter by price range
-    results = results.filter(car => 
-      car.price >= filters.priceRange[0] && car.price <= filters.priceRange[1]
-    );
+    results = results.filter(car => {
+      const price = parseInt(car.price);
+      return price >= filters.priceRange[0] && price <= filters.priceRange[1];
+    });
     
     setFilteredCars(results);
   };

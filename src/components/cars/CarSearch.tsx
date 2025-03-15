@@ -10,7 +10,7 @@ import { Search } from "lucide-react";
 
 interface CarSearchProps {
   onSearch: (filters: SearchFilters) => void;
-  onSearchChange?: (params: any) => void; // Added this prop to fix the error
+  onSearchChange?: (params: any) => void;
 }
 
 export interface SearchFilters {

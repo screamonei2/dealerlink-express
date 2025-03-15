@@ -1,199 +1,236 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import CarSearch from "@/components/cars/CarSearch";
-import CarCard from "@/components/cars/CarCard";
 import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationEllipsis, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
-} from "@/components/ui/pagination";
+  Dialog, DialogContent, DialogHeader, 
+  DialogTitle, DialogDescription, DialogFooter 
+} from "@/components/ui/dialog";
+import { Plus, Filter, X } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CarListingForm from "@/components/cars/CarListingForm";
+import CarSearch from "@/components/cars/CarSearch";
 
-interface CarData {
-  id: string;
-  brand: string;
-  model: string;
-  year: number;
-  price: number;
-  kilometers: number;
-  fuel: string;
-  transmission: string;
-  description: string;
-  images: string[];
-}
+// Mock data for demonstration
+const mockCars = [
+  {
+    id: "car-1",
+    brand: "Toyota",
+    model: "Corolla",
+    year: "2022",
+    price: "120000",
+    description: "Well-maintained Toyota Corolla with excellent fuel economy.",
+    color: "Silver",
+    mileage: "15000",
+    fuel: "flex",
+    transmission: "automatic",
+    photos: [
+      "https://images.unsplash.com/photo-1583121274602-3e2820c69888?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    ]
+  },
+  {
+    id: "car-2",
+    brand: "Honda",
+    model: "Civic",
+    year: "2021",
+    price: "110000",
+    description: "Sporty Honda Civic in excellent condition. Low mileage.",
+    color: "Black",
+    mileage: "22000",
+    fuel: "flex",
+    transmission: "automatic",
+    photos: [
+      "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    ]
+  },
+  {
+    id: "car-3",
+    brand: "Volkswagen",
+    model: "Golf",
+    year: "2020",
+    price: "95000",
+    description: "Volkswagen Golf with great handling and comfort.",
+    color: "White",
+    mileage: "35000",
+    fuel: "flex",
+    transmission: "manual",
+    photos: [
+      "https://images.unsplash.com/photo-1471479917193-f00955256257?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    ]
+  },
+  {
+    id: "car-4",
+    brand: "Ford",
+    model: "Ranger",
+    year: "2021",
+    price: "180000",
+    description: "Powerful Ford Ranger for work and leisure.",
+    color: "Blue",
+    mileage: "18000",
+    fuel: "diesel",
+    transmission: "automatic",
+    photos: [
+      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    ]
+  }
+];
 
 export default function Inventory() {
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useState({
-    query: "",
-    brand: "",
-    minPrice: "",
-    maxPrice: "",
-  });
+  const [cars, setCars] = useState(mockCars);
+  const [filteredCars, setFilteredCars] = useState(mockCars);
+  const [addCarDialogOpen, setAddCarDialogOpen] = useState(false);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
-  // This is mock data - would be replaced with Supabase query in real implementation
-  const mockCars: CarData[] = [
-    {
-      id: "1",
-      brand: "Toyota",
-      model: "Corolla",
-      year: 2022,
-      price: 120000,
-      kilometers: 15000,
-      fuel: "Flex",
-      transmission: "Automatic",
-      description: "Toyota Corolla XEI 2.0 Flex, único dono, completo.",
-      images: ["https://placehold.co/600x400?text=Toyota+Corolla"],
-    },
-    {
-      id: "2",
-      brand: "Honda",
-      model: "Civic",
-      year: 2021,
-      price: 130000,
-      kilometers: 20000,
-      fuel: "Flex",
-      transmission: "Automatic",
-      description: "Honda Civic Touring 1.5 Turbo, teto solar, couro.",
-      images: ["https://placehold.co/600x400?text=Honda+Civic"],
-    },
-    {
-      id: "3",
-      brand: "Volkswagen",
-      model: "Golf",
-      year: 2020,
-      price: 110000,
-      kilometers: 25000,
-      fuel: "Flex",
-      transmission: "Automatic",
-      description: "VW Golf GTI 2.0 Turbo, rodas 18\", som Fender.",
-      images: ["https://placehold.co/600x400?text=VW+Golf"],
-    },
-    {
-      id: "4",
-      brand: "Fiat",
-      model: "Pulse",
-      year: 2023,
-      price: 90000,
-      kilometers: 5000,
-      fuel: "Flex",
-      transmission: "Automatic",
-      description: "Fiat Pulse Impetus 1.0 Turbo, carro novo, completo.",
-      images: ["https://placehold.co/600x400?text=Fiat+Pulse"],
-    },
-    {
-      id: "5",
-      brand: "Jeep",
-      model: "Renegade",
-      year: 2022,
-      price: 115000,
-      kilometers: 18000,
-      fuel: "Flex",
-      transmission: "Automatic",
-      description: "Jeep Renegade Longitude 1.8, 4x2, completo.",
-      images: ["https://placehold.co/600x400?text=Jeep+Renegade"],
-    },
-    {
-      id: "6",
-      brand: "Chevrolet",
-      model: "Tracker",
-      year: 2021,
-      price: 105000,
-      kilometers: 22000,
-      fuel: "Flex",
-      transmission: "Automatic",
-      description: "Chevrolet Tracker Premier 1.2 Turbo, teto panorâmico.",
-      images: ["https://placehold.co/600x400?text=Chevrolet+Tracker"],
-    },
-  ];
+  useEffect(() => {
+    if (activeTab === "all") {
+      setFilteredCars(cars);
+    } else if (activeTab === "active") {
+      setFilteredCars(cars.filter(car => true)); // In a real app, filter by active status
+    } else if (activeTab === "sold") {
+      setFilteredCars(cars.filter(car => false)); // In a real app, filter by sold status
+    }
+  }, [activeTab, cars]);
 
-  // This would be filtered data from Supabase in real implementation
-  const filteredCars = mockCars.filter((car) => {
-    const matchesQuery =
-      car.brand.toLowerCase().includes(searchParams.query.toLowerCase()) ||
-      car.model.toLowerCase().includes(searchParams.query.toLowerCase()) ||
-      car.description.toLowerCase().includes(searchParams.query.toLowerCase());
+  const handleAddCar = (carData: any) => {
+    const newCar = {
+      id: `car-${cars.length + 1}`,
+      ...carData,
+    };
+    setCars([newCar, ...cars]);
+    setAddCarDialogOpen(false);
+  };
 
-    const matchesBrand = searchParams.brand
-      ? car.brand.toLowerCase() === searchParams.brand.toLowerCase()
-      : true;
-
-    const matchesMinPrice = searchParams.minPrice
-      ? car.price >= parseInt(searchParams.minPrice)
-      : true;
-
-    const matchesMaxPrice = searchParams.maxPrice
-      ? car.price <= parseInt(searchParams.maxPrice)
-      : true;
-
-    return matchesQuery && matchesBrand && matchesMinPrice && matchesMaxPrice;
-  });
-
-  const handleSearchChange = (params: any) => {
-    setSearchParams({ ...searchParams, ...params });
+  const handleSearchChange = (filters: any) => {
+    console.log("Search filters:", filters);
+    // In a real app, this would filter the cars based on the search filters
+    // For now, just log the filters
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
-        <Button onClick={() => navigate("/inventory/add")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Vehicle
-        </Button>
+    <div className="h-full flex flex-col">
+      <div className="container py-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Inventory Management</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setFilterDialogOpen(true)}>
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
+            <Button size="sm" onClick={() => setAddCarDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Vehicle
+            </Button>
+          </div>
+        </div>
+
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="all">All Vehicles</TabsTrigger>
+            <TabsTrigger value="active">Active Listings</TabsTrigger>
+            <TabsTrigger value="sold">Sold</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-4">
+            {filteredCars.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCars.map(car => (
+                  <Link key={car.id} to={`/inventory/${car.id}`} className="block">
+                    <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="aspect-video w-full overflow-hidden bg-muted">
+                        {car.photos && car.photos.length > 0 ? (
+                          <img 
+                            src={car.photos[0]} 
+                            alt={`${car.brand} ${car.model}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                            No Image
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg">{car.brand} {car.model}</h3>
+                        <div className="flex justify-between mt-2">
+                          <span className="text-muted-foreground">Year: {car.year}</span>
+                          <span className="font-medium">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            }).format(parseInt(car.price))}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground mb-4">No vehicles found.</p>
+                <Button onClick={() => setAddCarDialogOpen(true)}>Add Your First Vehicle</Button>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="active" className="space-y-4">
+            {/* Content for active vehicles */}
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No active listings found.</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="sold" className="space-y-4">
+            {/* Content for sold vehicles */}
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No sold vehicles found.</p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      <CarSearch onSearchChange={handleSearchChange} />
+      {/* Add Car Dialog */}
+      <Dialog open={addCarDialogOpen} onOpenChange={setAddCarDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Add New Vehicle</DialogTitle>
+            <DialogDescription>
+              Enter the details of the vehicle you want to list.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1 px-1">
+            <CarListingForm onSubmit={handleAddCar} />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
 
-      {filteredCars.length === 0 ? (
-        <div className="text-center p-10 border rounded-lg">
-          <h3 className="text-lg font-medium">No vehicles found</h3>
-          <p className="text-muted-foreground mt-2">
-            Try adjusting your search filters
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCars.map((car) => (
-            <CarCard
-              key={car.id}
-              car={car}
-              onView={() => navigate(`/inventory/${car.id}`)}
-              onEdit={() => navigate(`/inventory/${car.id}/edit`)}
-            />
-          ))}
-        </div>
-      )}
-
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              1
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">2</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {/* Filter Dialog */}
+      <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filter Vehicles</DialogTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-4 top-4" 
+              onClick={() => setFilterDialogOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <CarSearch onSearch={() => {}} onSearchChange={handleSearchChange} />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFilterDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => setFilterDialogOpen(false)}>Apply Filters</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -11,8 +11,8 @@ export default function LandingHeader() {
   const navItems = [
     { name: "Features", href: "#features" },
     { name: "Pricing", href: "#pricing" },
+    { name: "Browse Cars", href: "/cars" },
     { name: "Testimonials", href: "#testimonials" },
-    { name: "FAQ", href: "#faq" },
   ];
 
   return (
@@ -25,13 +25,23 @@ export default function LandingHeader() {
           
           <nav className="hidden md:flex gap-6">
             {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                {item.name}
-              </a>
+              item.href.startsWith("/") ? (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                >
+                  {item.name}
+                </a>
+              )
             ))}
           </nav>
         </div>
@@ -67,14 +77,25 @@ export default function LandingHeader() {
                 
                 <nav className="flex flex-col gap-4 mb-8">
                   {navItems.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="text-base font-medium transition-colors hover:text-primary"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.name}
-                    </a>
+                    item.href.startsWith("/") ? (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className="text-base font-medium transition-colors hover:text-primary"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="text-base font-medium transition-colors hover:text-primary"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </a>
+                    )
                   ))}
                 </nav>
                 
