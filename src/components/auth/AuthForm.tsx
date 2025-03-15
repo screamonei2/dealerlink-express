@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AuthForm() {
   const { toast } = useToast();
@@ -25,30 +26,45 @@ export default function AuthForm() {
     event.preventDefault();
     setIsLoading(true);
 
-    // In a real implementation, this would connect to Supabase Auth
     try {
       if (authMode === "login") {
-        // Simulate successful login for now
-        console.log("Logging in with:", formData.email);
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        
+        if (error) throw error;
+        
         toast({
           title: "Success!",
           description: "You've been logged in successfully.",
         });
         navigate("/dashboard");
       } else {
-        // Simulate successful registration
-        console.log("Registering with:", formData);
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              dealershipName: formData.dealershipName,
+              phone: formData.phone,
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
         toast({
           title: "Registration successful!",
           description: "Welcome to DealerLink Express. You're now logged in.",
         });
         navigate("/onboarding");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Auth error:", error);
       toast({
         title: "Authentication error",
-        description: "There was a problem signing you in. Please try again.",
+        description: error.message || "There was a problem signing you in. Please try again.",
         variant: "destructive",
       });
     } finally {

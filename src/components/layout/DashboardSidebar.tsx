@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
@@ -21,9 +21,31 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function DashboardSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem logging you out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const menuItems = [
     {
@@ -92,12 +114,10 @@ export default function DashboardSidebar() {
         <Button
           variant="ghost"
           className="w-full text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-          asChild
+          onClick={handleLogout}
         >
-          <Link to="/">
-            <LogOut className="h-5 w-5 mr-2" />
-            Logout
-          </Link>
+          <LogOut className="h-5 w-5 mr-2" />
+          Logout
         </Button>
       </SidebarFooter>
     </Sidebar>
